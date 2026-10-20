@@ -1,102 +1,52 @@
+<!doctype html>
+<html lang="de">
 <head>
-    <style>
-        body {
-    
-            background-image: url("/Dome.png");
-            background-size: cover;
-            background-position: center;
-            color:#0076BD;
-            font-family:'Courier New',Courier,monospace;
-            
-        }
-        header {
-            display: flex;
-            height: 200px;
-           
-        }
-        footer {
-            width: 1400px;
-            left: 23%;
-            display: flex;
-            position: fixed;
-            font-size: 75px ;
-            bottom: 130px;
-            
-        }
-        .loginscreen {
-            display: flex;
-            flex-wrap: wrap;
-            padding-top: 133px;
-            row-gap: 2 0px;
-            
-
-            svg {
-                width: auto;
-                height: 300px;
-                transform: rotateZ(90deg);
-
-                &:hover {
-                    rect {
-                        fill: #fff;
-                    }
-                }
-            }
-        }
-        .content {
-            height: calc(100vh - 350px);
-            padding-top: 30px;
-            margin: 0% 25% 0% 35%;
-        }
-        .card {
-            width: 25%;
-            display: flex;
-            justify-content: center;
-            transform: translateX(-90px);
-        }
-        .smallrow {
-            width: 50%;
-        }
-        h1 {
-            margin: 0;
-            position: fixed;
-            left: 62%;
-            margin-top: 190px;
-            font-size: 60px;
-        }
-
-        .numbers {
-            text-align: right;
-        }
-
-        .yellow {
-            color: #CA9D48;
-        }
-    </style>
-    <script type="text/javascript" src="/script.js"></script>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Daves App Dings</title>
+    <link rel="stylesheet" href="./style.css">
+    <script src="./script.js" defer></script>
 </head>
 <body>
-    <header>
-        <div class="smallrow">
-            <h1>M5-Q-KL</h1>
-        </div>
-    </header>
-    <div class="content">
-        <div class="loginscreen" id="loginscreen">
-            <div class="card">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 620 620" role="img" aria-label="Gebäude-Icon"> <rect x="30" y="28" width="560" height="558" rx="30" fill="#202020"/> <path fill="#000" fill-rule="evenodd" d=" M 74 72 H 101 V 231 H 201 V 380 H 311 V 228 H 432 V 379 H 543 V 535 H 74 Z M 95 379 H 165 V 510 H 95 Z "/> </svg>
+    <details class="settings">
+        <summary>Auflösung einstellen</summary>
+        <form id="resolution-form">
+            <label for="resolution-preset">Zeichenfläche</label>
+            <select id="resolution-preset">
+                <option value="auto">Automatisch (Fenstergröße)</option>
+                <option value="2560x1440">WQHD – 2560 × 1440</option>
+                <option value="1920x1080">Full HD – 1920 × 1080</option>
+                <option value="1280x720">HD – 1280 × 720</option>
+                <option value="768x1024">Tablet – 768 × 1024</option>
+                <option value="390x844">Handy – 390 × 844</option>
+                <option value="custom">Eigene Auflösung</option>
+            </select>
+            <div class="size-inputs">
+                <label>Breite (px)<input id="resolution-width" type="number" min="1" max="16384" step="1" value="2560" required></label>
+                <label>Höhe (px)<input id="resolution-height" type="number" min="1" max="16384" step="1" value="1440" required></label>
             </div>
+            <label class="pixel-option"><input id="actual-size" type="checkbox"> Originalgröße (bei Bedarf scrollen)</label>
+            <button type="submit">Übernehmen</button>
+            <button type="button" id="resolution-auto">Automatisch</button>
+            <output id="resolution-info" aria-live="polite"></output>
+            <p>Stellt die Zeichenfläche ein. Die Bildschirmauflösung bleibt unverändert. Ohne Originalgröße wird die Fläche passend ins Fenster verkleinert.</p>
+        </form>
+    </details>
+    <div class="screen-shell"><div class="display-area">
+    <main class="panel" aria-label="Bedienfeld">
+        <img class="panel-background" src="./Dome.png" alt="" width="2360" height="1640" draggable="false">
+        <header><h1>M5-Q-KL</h1></header>
+        <div class="loginscreen" id="loginscreen" aria-label="Tastenfeld">
+            <button class="card" type="button" aria-label="Taste 1">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 620 620" aria-hidden="true" focusable="false"><rect x="30" y="28" width="560" height="558" rx="30" fill="#202020"/><path fill="#000" fill-rule="evenodd" d="M 74 72 H 101 V 231 H 201 V 380 H 311 V 228 H 432 V 379 H 543 V 535 H 74 Z M 95 379 H 165 V 510 H 95 Z"/></svg>
+            </button>
         </div>
-    </div>
-    <footer>
-        <div class="smallrow">
+        <footer>
             <span>Ao+RT8</span>
-        </div>
-        <div class="smallrow numbers"> 
-            <span>RR-587-9932</span>
-            <br>
-            <span class="yellow" id="R2D2">RDY</span><span> 5U</span>
-        </div>
-    </footer>
-
-    </div>
+            <div class="numbers"><span>RR-587-9932</span><br><span class="yellow" id="R2D2" role="status" aria-live="polite">RDY</span><span> 5U</span></div>
+        </footer>
+    </main>
+    </div></div>
+    <noscript>Bitte JavaScript aktivieren, damit alle zwölf Tasten funktionieren.</noscript>
 </body>
+</html>
