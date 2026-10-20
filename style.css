@@ -1,0 +1,183 @@
+* { box-sizing: border-box; }
+html { height: 100%; background: #000; }
+body {
+    margin: 0;
+    min-height: 100vh;
+    min-height: 100svh;
+    display: grid;
+    place-items: center;
+    color: #0076bd;
+    font-family: "Courier New", Courier, monospace;
+    background: #000;
+}
+/* Bild, Beschriftung und Tasten teilen dasselbe Koordinatensystem.
+   Das komplette Originalmotiv bleibt auch im Hochformat sichtbar. */
+.panel {
+    position: relative;
+    width: min(100%, calc(var(--canvas-height, 100svh) * 2360 / 1640));
+    aspect-ratio: 2360 / 1640;
+    container-type: inline-size;
+    isolation: isolate;
+}
+.panel-background {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+    pointer-events: none;
+    user-select: none;
+}
+h1 {
+    position: absolute;
+    left: 62%;
+    top: 12.1%;
+    margin: 0;
+    font-size: 2.55cqw;
+    line-height: 1;
+}
+.loginscreen {
+    position: absolute;
+    left: 31.5%;
+    top: 24%;
+    width: 40%;
+    height: 52%;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-rows: repeat(4, minmax(0, 1fr));
+    column-gap: 1.5%;
+    row-gap: 7%;
+}
+.card {
+    position: relative;
+    min-width: 0;
+    min-height: 0;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    display: grid;
+    place-items: center;
+    cursor: pointer;
+    touch-action: none;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+}
+.card svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+    max-height: 100%;
+    aspect-ratio: 1;
+}
+@media (hover: hover) { .card:hover rect { fill: #fff; } }
+.card:active rect { fill: #fff; }
+.card.is-held rect { fill: #fff; }
+.card.is-selected rect { fill: #0076bd; stroke: #7ee5ff; stroke-width: 18px; }
+.multi-control {
+    position: fixed;
+    z-index: 9;
+    right: 8px;
+    top: 64px;
+    width: min(220px, calc(100vw - 16px));
+    max-height: calc(100svh - 80px);
+    overflow: auto;
+    padding: 10px;
+    border: 1px solid #168fc5;
+    border-radius: 8px;
+    background: #111e29;
+    color: #f1f5fa;
+    font: 13px/1.4 system-ui, sans-serif;
+}
+.multi-control button { padding: 8px 10px; cursor: pointer; font: inherit; }
+.multi-control button:disabled { cursor: default; }
+#selection-toggle { width: 100%; }
+#selection-toggle[aria-pressed="true"] { background: #0076bd; color: #fff; border: 1px solid #7ee5ff; }
+.multi-control p { margin: 8px 0; }
+#selection-go { background: #0076bd; border: 1px solid #7ee5ff; color: #fff; }
+#selection-go:disabled { opacity: 0.45; }
+.is-complete .multi-control { display: none; }
+.key-label { position: absolute; right: 10%; bottom: 8%; color: #29abdf; font: bold 1.1cqw system-ui, sans-serif; pointer-events: none; }
+.input-hint { position: fixed; left: 8px; bottom: 8px; z-index: 9; max-width: calc(100vw - 16px); margin: 0; padding: 6px 10px; border-radius: 5px; color: #e1eff9; background: #111e29e6; font: 12px/1.4 system-ui, sans-serif; }
+.card:focus-visible { outline: 2px solid #29abdf; outline-offset: 2px; }
+footer {
+    position: absolute;
+    left: 23%;
+    right: 18%;
+    top: 82.1%;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    font-size: 3.2cqw;
+    line-height: 1.1;
+    white-space: nowrap;
+}
+.numbers { text-align: right; }
+.yellow { color: #ca9d48; }
+body.is-complete { background: #000 url("./Oregano.png") center / contain no-repeat; }
+.is-complete .panel { visibility: hidden; }
+noscript { position: fixed; bottom: 0; padding: 1em; background: #000; color: #fff; }
+.screen-shell { position: relative; }
+.display-area {
+    position: absolute;
+    left: 0;
+    top: 0;
+    display: grid;
+    place-items: center;
+    transform-origin: top left;
+}
+.settings {
+    position: fixed;
+    z-index: 10;
+    top: 8px;
+    right: 8px;
+    width: min(360px, calc(100vw - 16px));
+    max-height: calc(100svh - 16px);
+    overflow: auto;
+    border: 1px solid #168fc5;
+    border-radius: 8px;
+    background: #111e29;
+    color: #f1f5fa;
+    font: 14px/1.4 system-ui, sans-serif;
+    box-shadow: 0 3px 16px #0008;
+}
+.settings summary { padding: 10px 12px; cursor: pointer; }
+.settings form { padding: 0 12px 12px; }
+.settings select, .settings input[type="number"] {
+    display: block;
+    width: 100%;
+    min-width: 0;
+    padding: 8px;
+    color: #fff;
+    background: #07121b;
+    border: 1px solid #7b99ad;
+    border-radius: 4px;
+    font: inherit;
+}
+.size-inputs { display: flex; gap: 10px; margin: 10px 0; }
+.size-inputs label { flex: 1; min-width: 0; }
+.pixel-option { display: block; margin: 10px 0; }
+.settings button { padding: 8px 10px; margin: 0 4px 8px 0; font: inherit; cursor: pointer; }
+.settings output { display: block; }
+.settings p { color: #c3d1db; font-size: 12px; margin-bottom: 0; }
+body.manual-size { place-items: start; }
+.is-complete .screen-shell { visibility: hidden; }
+/* Im Hochformat dreht sich nur der dekorative Rahmen. Tasten und
+   Beschriftungen bleiben aufrecht und nutzen den Innenraum. */
+.portrait .panel {
+    width: min(100%, calc(var(--canvas-height) * 1640 / 2360));
+    aspect-ratio: 1640 / 2360;
+}
+.portrait .panel-background {
+    inset: auto;
+    left: 50%;
+    top: 50%;
+    width: 143.902439%;
+    height: 69.491525%;
+    transform: translate(-50%, -50%) rotate(-90deg);
+}
+.portrait h1 { left: 36%; top: 17%; font-size: 3.5cqw; }
+.portrait .loginscreen { left: 23%; top: 25%; width: 54%; height: 46%; column-gap: 5%; row-gap: 3%; }
+.portrait footer { left: 19%; right: 18%; top: 76%; font-size: 3cqw; }
+.portrait .numbers br { display: none; }
+.portrait .numbers .yellow { margin-left: 1ch; }
+.portrait .key-label { font-size: 1.8cqw; }
