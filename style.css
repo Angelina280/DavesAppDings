@@ -43,12 +43,13 @@ h1 {
     width: 40%;
     height: 52%;
     display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    grid-template-rows: repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-rows: repeat(4, minmax(0, 1fr));
     column-gap: 1.5%;
     row-gap: 7%;
 }
 .card {
+    position: relative;
     min-width: 0;
     min-height: 0;
     padding: 0;
@@ -64,12 +65,15 @@ h1 {
 .card svg {
     display: block;
     width: 100%;
+    height: 100%;
     max-height: 100%;
     aspect-ratio: 1;
-    transform: rotate(90deg);
 }
 @media (hover: hover) { .card:hover rect { fill: #fff; } }
 .card:active rect { fill: #fff; }
+.card.is-held rect { fill: #fff; }
+.key-label { position: absolute; right: 10%; bottom: 8%; color: #29abdf; font: bold 1.1cqw system-ui, sans-serif; pointer-events: none; }
+.input-hint { position: fixed; left: 8px; bottom: 8px; z-index: 9; max-width: calc(100vw - 16px); margin: 0; padding: 6px 10px; border-radius: 5px; color: #e1eff9; background: #111e29e6; font: 12px/1.4 system-ui, sans-serif; }
 .card:focus-visible { outline: 2px solid #29abdf; outline-offset: 2px; }
 footer {
     position: absolute;
@@ -133,3 +137,21 @@ noscript { position: fixed; bottom: 0; padding: 1em; background: #000; color: #f
 .settings p { color: #c3d1db; font-size: 12px; margin-bottom: 0; }
 body.manual-size { place-items: start; }
 .is-complete .screen-shell { visibility: hidden; }
+/* Im Hochformat dreht sich nur der dekorative Rahmen. Tasten und
+   Beschriftungen bleiben aufrecht und nutzen den Innenraum. */
+.portrait .panel {
+    width: min(100%, calc(var(--canvas-height) * 1640 / 2360));
+    aspect-ratio: 1640 / 2360;
+}
+.portrait .panel-background {
+    inset: auto;
+    left: 50%;
+    top: 50%;
+    width: 143.902439%;
+    height: 69.491525%;
+    transform: translate(-50%, -50%) rotate(90deg);
+}
+.portrait h1 { left: 36%; top: 21.6%; font-size: 3.5cqw; }
+.portrait .loginscreen { left: 23%; top: 28%; width: 54%; height: 49%; column-gap: 5%; row-gap: 3%; }
+.portrait footer { left: 19%; right: 18%; top: 80%; font-size: 3.2cqw; }
+.portrait .key-label { font-size: 1.8cqw; }

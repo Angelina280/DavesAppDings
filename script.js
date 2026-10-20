@@ -1,48 +1,98 @@
 "use strict";
+
 document.addEventListener("DOMContentLoaded", function () {
   const screen = document.getElementById("loginscreen");
   const template = screen.querySelector(".card").cloneNode(true);
-  // Bisherige Positionen bleiben erhalten; die erste Taste erhält den
-  // zuvor ungenutzten zwölften Code statt eines leeren Datenwerts.
-  const codes = ["UwU", "10*/", "2469", "7*K", "UwU", "67", "R2D2", "5D//", "UwU", "994&", "633/", "83-X"];
-  const order = ["5D//", "633/", "7*K", "10*/", "994&", "5D//", "83-X", "633/", "7*K", "10*/", "994&"];
+  const status = document.getElementById("R2D2");
+  const hint = document.getElementById("input-hint");
+  // Anordnung aus dem Referenzbild: drei Spalten, vier Reihen.
+  // Die drei unbeschrifteten übrigen Felder behalten ihre bisherigen Codes.
+  const codes = ["UwU", "UwU", "UwU", "7*K", "5D//", "83-X", "2469", "67", "633//", "10*\\", "R2D2", "994&"];
+  const order = ["5D//", "633//", "7*K", "10*\\", "994&", "5D//", "83-X", "633//", "7*K", "10*\\", "994&"];
+  const keyCodes = ["KeyQ", "KeyW", "KeyE"];
+  const held = new Map();
   let progress = 0;
   let complete = false;
+  let finalArmed = false;
   screen.replaceChildren();
   codes.forEach((code, index) => {
     const card = template.cloneNode(true);
     card.dataset.number = code;
+    card.dataset.index = index;
     card.setAttribute("aria-label", `Taste ${index + 1}`);
+    if (index < 3) {
+      card.dataset.final = "true";
+      card.setAttribute("aria-keyshortcuts", keyCodes[index].slice(3));
+      const label = document.createElement("span");
+      label.className = "key-label";
+      label.textContent = keyCodes[index].slice(3);
+      card.appendChild(label);
+    }
     screen.appendChild(card);
   });
-  screen.addEventListener("click", function (event) {
-    const card = event.target.closest(".card");
-    if (!card || complete) return;
-    if (order[progress] === card.dataset.number || order[progress - 1] === card.dataset.number) progress++;
-    else progress = 0;
-    console.log(progress);
-    document.getElementById("R2D2").textContent = card.dataset.number;
-  });
-  // Pointer Events unterstützen Touchscreens, Stifte und Maus.
-  const activePointers = new Map();
-  const specialCodes = new Set(["7*K", "5D//", "83-X"]);
-  screen.addEventListener("pointerdown", function (event) {
-    const card = event.target.closest(".card");
-    if (!card || complete || !specialCodes.has(card.dataset.number)) return;
-    card.setPointerCapture(event.pointerId);
-    activePointers.set(event.pointerId, card.dataset.number);
-    if (new Set(activePointers.values()).size === 3) {
+  const finalCards = [...screen.querySelectorAll('[data-final="true"]')];
+  function updateHint() {
+    hint.textContent = progress === order.length
+      ? "Schritt 12/12: Obere drei Tasten gleichzeitig halten – PC: Q + W + E · Tablet: drei Finger"
+      : `Schritt ${progress}/12 · Letzter Schritt am PC: Q + W + E gleichzeitig halten`;
+  }
+  function updateHeld() {
+    const cards = new Set(held.values());
+    finalCards.forEach(card => card.classList.toggle("is-held", cards.has(card)));
+    if (progress === order.length && cards.size === 0) finalArmed = true;
+  }
+  function press(token, card) {
+    if (complete || held.has(token)) return;
+    held.set(token, card);
+    updateHeld();
+    if (progress === order.length && finalArmed && new Set(held.values()).size === 3) {
       complete = true;
-      activePointers.clear();
+      held.clear();
+      updateHeld();
       document.body.classList.add("is-complete");
+      hint.textContent = "Entsperrt – Neustart in zehn Sekunden";
       setTimeout(() => window.location.reload(), 10000);
     }
+  }
+  function release(token) {
+    held.delete(token);
+    updateHeld();
+  }
+  screen.addEventListener("click", event => {
+    const card = event.target.closest(".card");
+    if (!card || complete || card.dataset.final) return;
+    if (card.dataset.number === order[progress]) {
+      progress++;
+      finalArmed = progress === order.length && held.size === 0;
+    } else {
+      progress = 0;
+      finalArmed = false;
+    }
+    status.textContent = card.dataset.number;
+    updateHint();
   });
-  const release = event => activePointers.delete(event.pointerId);
-  screen.addEventListener("pointerup", release);
-  screen.addEventListener("pointercancel", release);
-  screen.addEventListener("lostpointercapture", release);
-  window.addEventListener("blur", () => activePointers.clear());
+  screen.addEventListener("pointerdown", event => {
+    const card = event.target.closest('[data-final="true"]');
+    if (!card || complete || event.button !== 0) return;
+    card.setPointerCapture(event.pointerId);
+    press(`pointer:${event.pointerId}`, card);
+  });
+  const releasePointer = event => release(`pointer:${event.pointerId}`);
+  screen.addEventListener("pointerup", releasePointer);
+  screen.addEventListener("pointercancel", releasePointer);
+  screen.addEventListener("lostpointercapture", releasePointer);
+  document.addEventListener("keydown", event => {
+    const index = keyCodes.indexOf(event.code);
+    if (index < 0 || event.repeat || event.ctrlKey || event.altKey || event.metaKey
+      || event.target.closest('input, select, textarea, [contenteditable], .settings')) return;
+    event.preventDefault();
+    press(`key:${event.code}`, finalCards[index]);
+  });
+  document.addEventListener("keyup", event => release(`key:${event.code}`));
+  function clearHeld() { held.clear(); updateHeld(); }
+  window.addEventListener("blur", clearHeld);
+  document.addEventListener("visibilitychange", () => { if (document.hidden) clearHeld(); });
+  updateHint();
 });
 
 document.addEventListener("DOMContentLoaded", function () {
@@ -52,6 +102,7 @@ document.addEventListener("DOMContentLoaded", function () {
   const heightInput = document.getElementById("resolution-height");
   const actualSize = document.getElementById("actual-size");
   const info = document.getElementById("resolution-info");
+  const orientationButton = document.getElementById("orientation-toggle");
   const shell = document.querySelector(".screen-shell");
   const area = document.querySelector(".display-area");
   let setting = { mode: "auto", width: 2560, height: 1440, actual: false };
@@ -68,6 +119,8 @@ document.addEventListener("DOMContentLoaded", function () {
     const availableHeight = window.innerHeight;
     const width = setting.mode === "auto" ? availableWidth : setting.width;
     const height = setting.mode === "auto" ? availableHeight : setting.height;
+    document.body.classList.toggle("portrait", height > width);
+    orientationButton.textContent = height > width ? "Ins Querformat wechseln" : "Ins Hochformat wechseln";
     const actual = setting.mode === "custom" && setting.actual;
     const scale = actual ? 1 : Math.min(1, availableWidth / width, availableHeight / height);
     document.body.classList.toggle("manual-size", actual);
@@ -115,6 +168,13 @@ document.addEventListener("DOMContentLoaded", function () {
     save();
   });
   window.addEventListener("resize", render);
+  orientationButton.addEventListener("click", () => {
+    const width = setting.mode === "auto" ? document.documentElement.clientWidth : setting.width;
+    const height = setting.mode === "auto" ? window.innerHeight : setting.height;
+    setting = { mode: "custom", width: height === width ? width : height, height: height === width ? Math.round(width * 1.5) : width, actual: setting.actual };
+    syncInputs();
+    save();
+  });
   syncInputs();
   render();
 });

@@ -28,17 +28,19 @@
             <label class="pixel-option"><input id="actual-size" type="checkbox"> Originalgröße (bei Bedarf scrollen)</label>
             <button type="submit">Übernehmen</button>
             <button type="button" id="resolution-auto">Automatisch</button>
+            <button type="button" id="orientation-toggle">Ins Hochformat wechseln</button>
             <output id="resolution-info" aria-live="polite"></output>
             <p>Stellt die Zeichenfläche ein. Die Bildschirmauflösung bleibt unverändert. Ohne Originalgröße wird die Fläche passend ins Fenster verkleinert.</p>
         </form>
     </details>
+    <p id="input-hint" class="input-hint" role="status" aria-live="polite"></p>
     <div class="screen-shell"><div class="display-area">
     <main class="panel" aria-label="Bedienfeld">
         <img class="panel-background" src="./Dome.png" alt="" width="2360" height="1640" draggable="false">
         <header><h1>M5-Q-KL</h1></header>
         <div class="loginscreen" id="loginscreen" aria-label="Tastenfeld">
             <button class="card" type="button" aria-label="Taste 1">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 620 620" aria-hidden="true" focusable="false"><rect x="30" y="28" width="560" height="558" rx="30" fill="#202020"/><path fill="#000" fill-rule="evenodd" d="M 74 72 H 101 V 231 H 201 V 380 H 311 V 228 H 432 V 379 H 543 V 535 H 74 Z M 95 379 H 165 V 510 H 95 Z"/></svg>
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 620 620" aria-hidden="true" focusable="false"><g transform="rotate(90 310 310)"><rect x="30" y="28" width="560" height="558" rx="30" fill="#202020"/><path fill="#000" fill-rule="evenodd" d="M 74 72 H 101 V 231 H 201 V 380 H 311 V 228 H 432 V 379 H 543 V 535 H 74 Z M 95 379 H 165 V 510 H 95 Z"/></g></svg>
             </button>
         </div>
         <footer>
