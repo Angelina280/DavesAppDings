@@ -33,6 +33,15 @@
             <p>Stellt die Zeichenfläche ein. Die Bildschirmauflösung bleibt unverändert. Ohne Originalgröße wird die Fläche passend ins Fenster verkleinert.</p>
         </form>
     </details>
+    <aside class="multi-control" aria-label="Gleichzeitig drücken">
+        <button type="button" id="selection-toggle" aria-pressed="false" aria-controls="selection-actions">Tasten markieren</button>
+        <div id="selection-actions" hidden>
+            <p>Drei Tasten im Feld markieren, dann Los drücken.</p>
+            <p id="selection-info" role="status" aria-live="polite">0 von 3 markiert</p>
+            <button type="button" id="selection-go" disabled>Los</button>
+            <button type="button" id="selection-clear">Auswahl löschen</button>
+        </div>
+    </aside>
     <p id="input-hint" class="input-hint" role="status" aria-live="polite"></p>
     <div class="screen-shell"><div class="display-area">
     <main class="panel" aria-label="Bedienfeld">

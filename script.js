@@ -11,6 +11,12 @@ document.addEventListener("DOMContentLoaded", function () {
   const order = ["5D//", "633//", "7*K", "10*\\", "994&", "5D//", "83-X", "633//", "7*K", "10*\\", "994&"];
   const keyCodes = ["KeyQ", "KeyW", "KeyE"];
   const held = new Map();
+  const selected = new Set();
+  const selectionToggle = document.getElementById("selection-toggle");
+  const selectionActions = document.getElementById("selection-actions");
+  const selectionInfo = document.getElementById("selection-info");
+  const selectionGo = document.getElementById("selection-go");
+  let selectionMode = false;
   let progress = 0;
   let complete = false;
   let finalArmed = false;
@@ -33,8 +39,21 @@ document.addEventListener("DOMContentLoaded", function () {
   const finalCards = [...screen.querySelectorAll('[data-final="true"]')];
   function updateHint() {
     hint.textContent = progress === order.length
-      ? "Schritt 12/12: Obere drei Tasten gleichzeitig halten – PC: Q + W + E · Tablet: drei Finger"
-      : `Schritt ${progress}/12 · Letzter Schritt am PC: Q + W + E gleichzeitig halten`;
+      ? "Schritt 12/12: Obere drei gleichzeitig – rechts markieren + Los · alternativ Q + W + E oder drei Finger"
+      : `Schritt ${progress}/12 · Letzter Schritt: rechts Tasten markieren und Los drücken`;
+    updateSelection();
+  }
+  function updateSelection() {
+    selectionToggle.setAttribute("aria-pressed", String(selectionMode));
+    selectionToggle.textContent = selectionMode ? "Markieren beenden" : "Tasten markieren";
+    selectionActions.hidden = !selectionMode;
+    screen.querySelectorAll(".card").forEach(card => {
+      card.classList.toggle("is-selected", selected.has(card));
+      if (selectionMode) card.setAttribute("aria-pressed", String(selected.has(card)));
+      else card.removeAttribute("aria-pressed");
+    });
+    selectionInfo.textContent = `${selected.size} von 3 markiert` + (progress < order.length ? " · Zuerst die Codefolge eingeben." : "");
+    selectionGo.disabled = complete || selected.size !== 3 || progress !== order.length;
   }
   function updateHeld() {
     const cards = new Set(held.values());
@@ -45,12 +64,14 @@ document.addEventListener("DOMContentLoaded", function () {
     if (complete || held.has(token)) return;
     held.set(token, card);
     updateHeld();
-    if (progress === order.length && finalArmed && new Set(held.values()).size === 3) {
+    const down = new Set(held.values());
+    if (progress === order.length && finalArmed && finalCards.every(card => down.has(card))) {
       complete = true;
       held.clear();
       updateHeld();
       document.body.classList.add("is-complete");
       hint.textContent = "Entsperrt – Neustart in zehn Sekunden";
+      selectionGo.disabled = true;
       setTimeout(() => window.location.reload(), 10000);
     }
   }
@@ -60,7 +81,14 @@ document.addEventListener("DOMContentLoaded", function () {
   }
   screen.addEventListener("click", event => {
     const card = event.target.closest(".card");
-    if (!card || complete || card.dataset.final) return;
+    if (!card || complete) return;
+    if (selectionMode) {
+      if (selected.has(card)) selected.delete(card);
+      else if (selected.size < 3) selected.add(card);
+      updateSelection();
+      return;
+    }
+    if (card.dataset.final) return;
     if (card.dataset.number === order[progress]) {
       progress++;
       finalArmed = progress === order.length && held.size === 0;
@@ -73,7 +101,7 @@ document.addEventListener("DOMContentLoaded", function () {
   });
   screen.addEventListener("pointerdown", event => {
     const card = event.target.closest('[data-final="true"]');
-    if (!card || complete || event.button !== 0) return;
+    if (!card || complete || selectionMode || event.button !== 0) return;
     card.setPointerCapture(event.pointerId);
     press(`pointer:${event.pointerId}`, card);
   });
@@ -83,13 +111,34 @@ document.addEventListener("DOMContentLoaded", function () {
   screen.addEventListener("lostpointercapture", releasePointer);
   document.addEventListener("keydown", event => {
     const index = keyCodes.indexOf(event.code);
-    if (index < 0 || event.repeat || event.ctrlKey || event.altKey || event.metaKey
-      || event.target.closest('input, select, textarea, [contenteditable], .settings')) return;
+    if (selectionMode || index < 0 || event.repeat || event.ctrlKey || event.altKey || event.metaKey
+      || event.target.closest('input, select, textarea, [contenteditable], .settings, .multi-control')) return;
     event.preventDefault();
     press(`key:${event.code}`, finalCards[index]);
   });
   document.addEventListener("keyup", event => release(`key:${event.code}`));
   function clearHeld() { held.clear(); updateHeld(); }
+  selectionToggle.addEventListener("click", () => {
+    if (complete) return;
+    selectionMode = !selectionMode;
+    selected.clear();
+    clearHeld();
+    updateSelection();
+  });
+  document.getElementById("selection-clear").addEventListener("click", () => {
+    selected.clear();
+    updateSelection();
+  });
+  selectionGo.addEventListener("click", () => {
+    if (!selectionMode || complete || progress !== order.length || selected.size !== 3) return;
+    if (!finalCards.every(card => selected.has(card))) {
+      selectionInfo.textContent = "Falsche Auswahl – markiere die drei Tasten der obersten Reihe.";
+      return;
+    }
+    clearHeld();
+    [...selected].forEach((card, index) => press(`selection:${index}`, card));
+    [...selected].forEach((_, index) => release(`selection:${index}`));
+  });
   window.addEventListener("blur", clearHeld);
   document.addEventListener("visibilitychange", () => { if (document.hidden) clearHeld(); });
   updateHint();

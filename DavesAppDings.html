@@ -78,6 +78,30 @@ h1 {
 @media (hover: hover) { .card:hover rect { fill: #fff; } }
 .card:active rect { fill: #fff; }
 .card.is-held rect { fill: #fff; }
+.card.is-selected rect { fill: #0076bd; stroke: #7ee5ff; stroke-width: 18px; }
+.multi-control {
+    position: fixed;
+    z-index: 9;
+    right: 8px;
+    top: 64px;
+    width: min(220px, calc(100vw - 16px));
+    max-height: calc(100svh - 80px);
+    overflow: auto;
+    padding: 10px;
+    border: 1px solid #168fc5;
+    border-radius: 8px;
+    background: #111e29;
+    color: #f1f5fa;
+    font: 13px/1.4 system-ui, sans-serif;
+}
+.multi-control button { padding: 8px 10px; cursor: pointer; font: inherit; }
+.multi-control button:disabled { cursor: default; }
+#selection-toggle { width: 100%; }
+#selection-toggle[aria-pressed="true"] { background: #0076bd; color: #fff; border: 1px solid #7ee5ff; }
+.multi-control p { margin: 8px 0; }
+#selection-go { background: #0076bd; border: 1px solid #7ee5ff; color: #fff; }
+#selection-go:disabled { opacity: 0.45; }
+.is-complete .multi-control { display: none; }
 .key-label { position: absolute; right: 10%; bottom: 8%; color: #29abdf; font: bold 1.1cqw system-ui, sans-serif; pointer-events: none; }
 .input-hint { position: fixed; left: 8px; bottom: 8px; z-index: 9; max-width: calc(100vw - 16px); margin: 0; padding: 6px 10px; border-radius: 5px; color: #e1eff9; background: #111e29e6; font: 12px/1.4 system-ui, sans-serif; }
 .card:focus-visible { outline: 2px solid #29abdf; outline-offset: 2px; }
@@ -177,6 +201,12 @@ document.addEventListener("DOMContentLoaded", function () {
   const order = ["5D//", "633//", "7*K", "10*\\", "994&", "5D//", "83-X", "633//", "7*K", "10*\\", "994&"];
   const keyCodes = ["KeyQ", "KeyW", "KeyE"];
   const held = new Map();
+  const selected = new Set();
+  const selectionToggle = document.getElementById("selection-toggle");
+  const selectionActions = document.getElementById("selection-actions");
+  const selectionInfo = document.getElementById("selection-info");
+  const selectionGo = document.getElementById("selection-go");
+  let selectionMode = false;
   let progress = 0;
   let complete = false;
   let finalArmed = false;
@@ -199,8 +229,21 @@ document.addEventListener("DOMContentLoaded", function () {
   const finalCards = [...screen.querySelectorAll('[data-final="true"]')];
   function updateHint() {
     hint.textContent = progress === order.length
-      ? "Schritt 12/12: Obere drei Tasten gleichzeitig halten – PC: Q + W + E · Tablet: drei Finger"
-      : `Schritt ${progress}/12 · Letzter Schritt am PC: Q + W + E gleichzeitig halten`;
+      ? "Schritt 12/12: Obere drei gleichzeitig – rechts markieren + Los · alternativ Q + W + E oder drei Finger"
+      : `Schritt ${progress}/12 · Letzter Schritt: rechts Tasten markieren und Los drücken`;
+    updateSelection();
+  }
+  function updateSelection() {
+    selectionToggle.setAttribute("aria-pressed", String(selectionMode));
+    selectionToggle.textContent = selectionMode ? "Markieren beenden" : "Tasten markieren";
+    selectionActions.hidden = !selectionMode;
+    screen.querySelectorAll(".card").forEach(card => {
+      card.classList.toggle("is-selected", selected.has(card));
+      if (selectionMode) card.setAttribute("aria-pressed", String(selected.has(card)));
+      else card.removeAttribute("aria-pressed");
+    });
+    selectionInfo.textContent = `${selected.size} von 3 markiert` + (progress < order.length ? " · Zuerst die Codefolge eingeben." : "");
+    selectionGo.disabled = complete || selected.size !== 3 || progress !== order.length;
   }
   function updateHeld() {
     const cards = new Set(held.values());
@@ -211,12 +254,14 @@ document.addEventListener("DOMContentLoaded", function () {
     if (complete || held.has(token)) return;
     held.set(token, card);
     updateHeld();
-    if (progress === order.length && finalArmed && new Set(held.values()).size === 3) {
+    const down = new Set(held.values());
+    if (progress === order.length && finalArmed && finalCards.every(card => down.has(card))) {
       complete = true;
       held.clear();
       updateHeld();
       document.body.classList.add("is-complete");
       hint.textContent = "Entsperrt – Neustart in zehn Sekunden";
+      selectionGo.disabled = true;
       setTimeout(() => window.location.reload(), 10000);
     }
   }
@@ -226,7 +271,14 @@ document.addEventListener("DOMContentLoaded", function () {
   }
   screen.addEventListener("click", event => {
     const card = event.target.closest(".card");
-    if (!card || complete || card.dataset.final) return;
+    if (!card || complete) return;
+    if (selectionMode) {
+      if (selected.has(card)) selected.delete(card);
+      else if (selected.size < 3) selected.add(card);
+      updateSelection();
+      return;
+    }
+    if (card.dataset.final) return;
     if (card.dataset.number === order[progress]) {
       progress++;
       finalArmed = progress === order.length && held.size === 0;
@@ -239,7 +291,7 @@ document.addEventListener("DOMContentLoaded", function () {
   });
   screen.addEventListener("pointerdown", event => {
     const card = event.target.closest('[data-final="true"]');
-    if (!card || complete || event.button !== 0) return;
+    if (!card || complete || selectionMode || event.button !== 0) return;
     card.setPointerCapture(event.pointerId);
     press(`pointer:${event.pointerId}`, card);
   });
@@ -249,13 +301,34 @@ document.addEventListener("DOMContentLoaded", function () {
   screen.addEventListener("lostpointercapture", releasePointer);
   document.addEventListener("keydown", event => {
     const index = keyCodes.indexOf(event.code);
-    if (index < 0 || event.repeat || event.ctrlKey || event.altKey || event.metaKey
-      || event.target.closest('input, select, textarea, [contenteditable], .settings')) return;
+    if (selectionMode || index < 0 || event.repeat || event.ctrlKey || event.altKey || event.metaKey
+      || event.target.closest('input, select, textarea, [contenteditable], .settings, .multi-control')) return;
     event.preventDefault();
     press(`key:${event.code}`, finalCards[index]);
   });
   document.addEventListener("keyup", event => release(`key:${event.code}`));
   function clearHeld() { held.clear(); updateHeld(); }
+  selectionToggle.addEventListener("click", () => {
+    if (complete) return;
+    selectionMode = !selectionMode;
+    selected.clear();
+    clearHeld();
+    updateSelection();
+  });
+  document.getElementById("selection-clear").addEventListener("click", () => {
+    selected.clear();
+    updateSelection();
+  });
+  selectionGo.addEventListener("click", () => {
+    if (!selectionMode || complete || progress !== order.length || selected.size !== 3) return;
+    if (!finalCards.every(card => selected.has(card))) {
+      selectionInfo.textContent = "Falsche Auswahl – markiere die drei Tasten der obersten Reihe.";
+      return;
+    }
+    clearHeld();
+    [...selected].forEach((card, index) => press(`selection:${index}`, card));
+    [...selected].forEach((_, index) => release(`selection:${index}`));
+  });
   window.addEventListener("blur", clearHeld);
   document.addEventListener("visibilitychange", () => { if (document.hidden) clearHeld(); });
   updateHint();
@@ -372,6 +445,15 @@ document.addEventListener("DOMContentLoaded", function () {
             <p>Stellt die Zeichenfläche ein. Die Bildschirmauflösung bleibt unverändert. Ohne Originalgröße wird die Fläche passend ins Fenster verkleinert.</p>
         </form>
     </details>
+    <aside class="multi-control" aria-label="Gleichzeitig drücken">
+        <button type="button" id="selection-toggle" aria-pressed="false" aria-controls="selection-actions">Tasten markieren</button>
+        <div id="selection-actions" hidden>
+            <p>Drei Tasten im Feld markieren, dann Los drücken.</p>
+            <p id="selection-info" role="status" aria-live="polite">0 von 3 markiert</p>
+            <button type="button" id="selection-go" disabled>Los</button>
+            <button type="button" id="selection-clear">Auswahl löschen</button>
+        </div>
+    </aside>
     <p id="input-hint" class="input-hint" role="status" aria-live="polite"></p>
     <div class="screen-shell"><div class="display-area">
     <main class="panel" aria-label="Bedienfeld">

@@ -13,14 +13,15 @@ Alternativ `login.html` öffnen. Dabei müssen `style.css`, `script.js`, `Dome.p
 - **Automatisch / Originalgröße:** Automatisch passt die Fläche ins Fenster. Originalgröße zeigt sie 1:1 und erlaubt bei Bedarf Scrollen. Die Auswahl wird im Browser gespeichert, sofern lokaler Speicher verfügbar ist.
 - **Direktes Öffnen:** Relative Dateipfade beheben fehlende Bilder und Skripte bei `file://`. Die eigenständige HTML-Datei benötigt keine Begleitdateien.
 - **Bedienung nach Referenzbild:** Drei Spalten, vier Reihen. Zuerst die elf Eingaben in der unten angegebenen Reihenfolge ausführen. Eine falsche Eingabe setzt den Fortschritt zurück.
-- **Gleichzeitiger letzter Schritt:** Danach die drei Tasten der obersten Reihe gleichzeitig halten: am PC mit **Q + W + E**, am Tablet mit drei Fingern. Vorzeitiges Halten und drei einzelne Tastendrücke entsperren nicht. Gedrückte Felder leuchten auf. Nach dem Entsperren erscheint das Folgebild, nach zehn Sekunden startet die Seite neu.
+- **Gleichzeitiger letzter Schritt:** Danach rechts **Tasten markieren** aktivieren, die drei obersten Tasten anklicken und **Los** drücken. Markierte Felder leuchten blau; ein erneuter Klick entfernt die Markierung. „Auswahl löschen“ entfernt alle Markierungen; „Markieren beenden“ kehrt zur normalen Eingabe zurück. Die Auswahl erzeugt keine einzelnen Codeeingaben. Los wird erst nach der richtigen Codefolge mit genau drei Markierungen freigegeben; nur die richtige Dreierauswahl entsperrt.
+- **Alternative Bedienung:** Die drei oberen Tasten können weiterhin am PC mit **Q + W + E** oder am Tablet mit drei Fingern gleichzeitig gehalten werden. Vorzeitiges Halten und drei einzelne Tastendrücke entsperren nicht. Nach dem Entsperren erscheint das Folgebild, nach zehn Sekunden startet die Seite neu.
 - **Quer-/Hochformat:** Unter „Auflösung einstellen“ wechselt der Format-Button die Breite und Höhe. Der dekorative Rahmen dreht sich; Tasten und Beschriftungen bleiben aufrecht. Automatisch folgt wieder dem Browserfenster.
 
 ## Tastenfolge aus dem Bild
 
 `5D// → 633// → 7*K → 10*\ → 994& → 5D// → 83-X → 633// → 7*K → 10*\ → 994&`
 
-Schritt 12: die obersten drei Felder gleichzeitig (PC: **Q + W + E**).
+Schritt 12: rechts **Tasten markieren**, die obersten drei Felder auswählen, dann **Los**. Alternativ **Q + W + E** oder drei Finger gleichzeitig.
 
 | Reihe | Links | Mitte | Rechts |
 | --- | --- | --- | --- |
@@ -42,3 +43,5 @@ In Microsoft Edge per direktem `file://`-Aufruf geprüft: 2560×1440, 1920×1080
 Die eigenständige HTML wurde zusätzlich in einem isolierten Ordner ohne Begleitdateien geprüft: freie Maße 1733×977, WQHD-Vorgabe, 1:1-Anzeige, Speichern/Neuladen, automatische Fensteranpassung und eingebettetes Folgebild.
 
 Für die neue Eingabe geprüft: korrekte Folge, falsche und wiederholte Eingaben, Sperre gegen vorzeitige/einzelne/zwei/gehaltene Abschluss-Tasten, Q/W/E gemeinsam, Loslassen bei Fokusverlust und keine Spiel-Tastenkürzel beim Bearbeiten der Einstellungen. Ein echter Drei-Punkt-Touch im emulierten Browser entsperrt nach der Folge. Quer-/Hochformat und Symbolgrenzen wurden bei fünf Fenstergrößen geprüft. Echte Mobilgeräte und Safari wurden nicht getestet.
+
+Markieren und Los separat geprüft: Auswählen/Abwählen, maximal drei Markierungen, Löschen/Beenden, keine Codeeingaben im Auswahlmodus, Sperre vor der Codefolge, falsche Dreierauswahl, erfolgreicher Abschluss mit den obersten drei Tasten und Darstellung auf schmalem Handybildschirm.
